@@ -22,6 +22,7 @@ import { findTalentPubkey, updateNotification } from '../../utils/functions';
 import { EarningModal } from '../modals/earningModal';
 import parse from 'html-react-parser';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 
 type ListingSectionProps = {
   children?: React.ReactNode;

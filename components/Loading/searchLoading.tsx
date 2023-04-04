@@ -1,5 +1,5 @@
 import { Center, HStack } from '@chakra-ui/react';
-import { Player } from '@lottiefiles/react-lottie-player';
+import Lottie from 'lottie-react';
 
 const SearchLoading = () => {
   return (
@@ -15,14 +15,14 @@ const SearchLoading = () => {
           alignItems={'center'}
           justify="center"
         >
-          <Player
+          <Lottie
             style={{ height: '300px', width: '300px' }}
             autoplay
             loop
-            src={
+            animationData={
               'https://assets4.lottiefiles.com/private_files/lf30_fup2uejx.json'
             }
-          ></Player>
+          ></Lottie>
         </HStack>
       </Center>
     </>

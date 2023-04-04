@@ -1,11 +1,4 @@
-import {
-  Box,
-  Flex,
-  Text,
-  Image,
-  VStack,
-  useMediaQuery,
-} from '@chakra-ui/react';
+import { Box, Flex, Text, VStack, useMediaQuery } from '@chakra-ui/react';
 import type { GetServerSideProps, NextPage } from 'next';
 import NavHome from '../components/home/NavHome';
 
@@ -14,7 +7,7 @@ import Banner from '../components/home/Banner';
 import SideBar from '../components/home/SideBar';
 
 import { dehydrate, QueryClient, useQuery } from '@tanstack/react-query';
-import { fetchAll, fetchBasicInfo, TalentTVE } from '../utils/functions';
+import { fetchAll, fetchBasicInfo } from '../utils/functions';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
@@ -22,7 +15,13 @@ import { userStore } from '../store/user';
 
 import { TalentStore } from '../store/talent';
 import { useWallet } from '@solana/wallet-adapter-react';
-import SearchLoading from '../components/Loading/searchLoading';
+const SearchLoading = dynamic(
+  () => import('../components/Loading/searchLoading'),
+  {
+    ssr: true,
+  }
+);
+// import SearchLoading from '../components/Loading/searchLoading';
 import { BountyStatus } from '../interface/types';
 import {
   BountiesCard,
@@ -31,6 +30,8 @@ import {
   JobsCard,
   ListingSection,
 } from '../components/misc/listingsCard';
+
+import dynamic from 'next/dynamic';
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -247,21 +248,21 @@ const Home: NextPage = () => {
     </>
   );
 };
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const queryClient = new QueryClient();
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const queryClient = new QueryClient();
 
-  const { query, res } = context;
+//   const { query, res } = context;
 
-  try {
-    await queryClient.prefetchQuery(['all', 'listings'], () =>
-      fetchAll(query.search as string, query.filter as string)
-    );
-  } catch (error) {
-    console.log(error);
-  }
-  return {
-    props: { dehydratedState: dehydrate(queryClient) },
-  };
-};
+//   try {
+//     await queryClient.prefetchQuery(['all', 'listings'], () =>
+//       fetchAll(query.search as string, query.filter as string)
+//     );
+//   } catch (error) {
+//     console.log(error);
+//   }
+//   return {
+//     props: { dehydratedState: dehydrate(queryClient) },
+//   };
+// };
 
 export default Home;
