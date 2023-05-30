@@ -11,6 +11,8 @@ function Port() {
   const [sponsorsLoading, setSponsorsLoading] = useState(false);
   const [newSponsorsLoading, setNewSponsorsLoading] = useState(false);
   const [bountiesLoading, setBountiesLoading] = useState(false);
+  const [bountiesTemplatesLoading, setBountiesTemplatesLoading] =
+    useState(false);
   const [grantsLoading, setGrantsLoading] = useState(false);
   const [totalLoading, setTotalLoading] = useState(false);
   const [jobsLoading, setJobsLoading] = useState(false);
@@ -179,6 +181,26 @@ function Port() {
     }
   };
 
+  const portBountiesTemplates = async () => {
+    setBountiesTemplatesLoading(true);
+    try {
+      const bountiesTemplates = await axios.post(
+        '/api/port/bountiesTemplates',
+        {
+          userId,
+        }
+      );
+      console.log(
+        'file: port.tsx:17 ~ portBountiesTemplates ~ bountiesTemplates:',
+        bountiesTemplates
+      );
+      setBountiesTemplatesLoading(false);
+    } catch (e) {
+      console.log('file: port.tsx:16 ~ portBounties ~ e:', e);
+      setBountiesTemplatesLoading(false);
+    }
+  };
+
   return (
     <Default
       meta={
@@ -297,6 +319,16 @@ function Port() {
           variant="solid"
         >
           Port New Schema User
+        </Button>
+        <Button
+          w="full"
+          mt={4}
+          isLoading={!!bountiesTemplatesLoading}
+          loadingText="Porting..."
+          onClick={() => portBountiesTemplates()}
+          variant="solid"
+        >
+          Port Bounties Templates
         </Button>
       </Container>
     </Default>
