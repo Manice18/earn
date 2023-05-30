@@ -38,90 +38,112 @@ export const IndustryList: MultiSelectOptions[] = [
 export const tokenList = [
   {
     tokenName: 'Solana (SOL)',
+    tokenSymbol: 'SOL',
     mintAddress: 'sadfasdf', // need to change it
     address: 'dsafasdf', // need to change
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/16116.png',
   },
   {
     tokenName: 'USDC',
+    tokenSymbol: 'USDC',
     mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
   },
   {
+    tokenName: 'ISC',
+    tokenSymbol: 'ISC',
+    mintAddress: '',
+    address: '',
+    icon: 'https://res.cloudinary.com/dgvnuwspr/image/upload/v1683200072/sponsors/International%20Stable%20Currency.png',
+  },
+  {
     tokenName: 'USDT',
+    tokenSymbol: 'USDT',
     mintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
     address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
   },
   {
     tokenName: 'STEP',
+    tokenSymbol: 'STEP',
     mintAddress: '',
     address: '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/32x32/18069.png',
+    icon: 'https://assets.coingecko.com/coins/images/14988/small/step.png?1619274762',
   },
   {
     tokenName: 'mSOL',
+    tokenSymbol: 'mSOL',
     mintAddress: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
     address: 'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/11461.png',
   },
   {
     tokenName: 'UXD Stablecoin (UXD)',
+    tokenSymbol: 'UXD',
     mintAddress: '7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT',
     address: '7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/17535.png',
   },
   {
     tokenName: 'Raydium (RAY)',
+    tokenSymbol: 'RAY',
     mintAddress: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
     address: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/8526.png',
   },
   {
     tokenName: 'Saber (SBR)',
+    tokenSymbol: 'SBR',
     mintAddress: 'Saber2gLauYim4Mvftnrasomsv6NvAuncvMEZwcLpD1',
     address: 'Saber2gLauYim4Mvftnrasomsv6NvAuncvMEZwcLpD1',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/11181.png',
   },
   {
     tokenName: 'Solend (SLND)',
+    tokenSymbol: 'SLND',
     mintAddress: 'SLNDpmoWTVADgEdndyvWzroNL7zSi1dF9PC3xHGtPwp',
     address: 'SLNDpmoWTVADgEdndyvWzroNL7zSi1dF9PC3xHGtPwp',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/13524.png',
   },
   {
     tokenName: 'Coin98 (C98)',
+    tokenSymbol: 'C98',
     mintAddress: 'C98A4nkJXhpVZNAZdHUA95RpTF3T4whtQubL3YobiUX9',
     address: 'C98A4nkJXhpVZNAZdHUA95RpTF3T4whtQubL3YobiUX9',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/10903.png',
   },
   {
     tokenName: 'Serum (SRM)',
+    tokenSymbol: 'SRM',
     mintAddress: 'SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt',
     address: 'SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/6187.png',
   },
   {
     tokenName: 'DUST Protocol (DUST)',
+    tokenSymbol: 'DUST',
     mintAddress: 'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ',
     address: 'DUSTawucrTsGU8hcqRdHDCbuYhCPADMLM2VcCb8VnFnQ',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/18802.png',
   },
   {
     tokenName: 'wrapped Solana (wSOL)',
+    tokenSymbol: 'wSOL',
     mintAddress: 'So11111111111111111111111111111111111111112',
     address: 'So11111111111111111111111111111111111111112',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/16116.png',
   },
   {
     tokenName: 'Bonfida (FIDA)',
+    tokenSymbol: 'FIDA',
     mintAddress: 'EchesyfXePKdLtoiZSL8pBe8Myagyy8ZRqsACNCFGnvp',
     address: 'EchesyfXePKdLtoiZSL8pBe8Myagyy8ZRqsACNCFGnvp',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/7978.png',
   },
   {
     tokenName: 'Orca (ORCA)',
+    tokenSymbol: 'ORCA',
     mintAddress: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',
     address: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/11165.png',
@@ -129,24 +151,24 @@ export const tokenList = [
 ];
 export const MainSkills: MultiSelectOptions[] = [
   {
-    label: 'Front-End Dev',
-    value: 'Front-End-Dev',
+    label: 'Frontend',
+    value: 'Frontend',
   },
   {
-    label: 'Back-End Dev',
-    value: 'Back-End-Dev',
+    label: 'Backend',
+    value: 'Backend',
   },
   {
-    label: 'Blockchain Dev',
-    value: 'Blockchain-Dev',
+    label: 'Blockchain',
+    value: 'Blockchain',
   },
   {
-    label: 'Fullstack Dev',
-    value: 'Fullstack-Dev',
+    label: 'Fullstack',
+    value: 'Fullstack',
   },
   {
-    label: 'Mobile Engineer',
-    value: 'Mobile-Engineer',
+    label: 'Mobile',
+    value: 'Mobile',
   },
   {
     label: 'Design',
@@ -171,7 +193,7 @@ export const MainSkills: MultiSelectOptions[] = [
 ];
 
 export const skillSubSkillMap = {
-  'Front-End-Dev': [
+  Frontend: [
     {
       label: 'React',
       value: 'React',
@@ -189,7 +211,7 @@ export const skillSubSkillMap = {
       value: 'Redux',
     },
   ],
-  'Back-End-Dev': [
+  Backend: [
     {
       label: 'Javascript',
       value: 'Javascript',
@@ -235,7 +257,7 @@ export const skillSubSkillMap = {
       value: 'MongoDB',
     },
   ],
-  'Blockchain-Dev': [
+  Blockchain: [
     {
       label: 'Rust',
       value: 'Rust',
@@ -249,7 +271,7 @@ export const skillSubSkillMap = {
       value: 'Move',
     },
   ],
-  'Mobile-Engineer': [
+  Mobile: [
     {
       label: 'Android',
       value: 'Android',
@@ -331,7 +353,7 @@ export const skillSubSkillMap = {
       value: 'Social Media',
     },
   ],
-  other: [
+  Other: [
     {
       label: 'Data Analytics',
       value: 'Data Analytics',
@@ -341,7 +363,68 @@ export const skillSubSkillMap = {
       value: 'Operations',
     },
   ],
-  'Fullstack-Dev': [],
+  Fullstack: [
+    {
+      label: 'Javascript',
+      value: 'Javascript',
+    },
+    {
+      label: 'PHP',
+      value: 'PHP',
+    },
+    {
+      label: 'Python',
+      value: 'Python',
+    },
+    {
+      label: 'Java',
+      value: 'Java',
+    },
+    {
+      label: 'C++',
+      value: 'C++',
+    },
+    {
+      label: 'C',
+      value: 'C',
+    },
+    {
+      label: 'Ruby',
+      value: 'Ruby',
+    },
+    {
+      label: 'Go',
+      value: 'Go',
+    },
+    {
+      label: 'MySQL',
+      value: 'MySQL',
+    },
+    {
+      label: 'Postgres',
+      value: 'Postgres',
+    },
+    {
+      label: 'MongoDB',
+      value: 'MongoDB',
+    },
+    {
+      label: 'React',
+      value: 'React',
+    },
+    {
+      label: 'Angular',
+      value: 'Angular',
+    },
+    {
+      label: 'Vue',
+      value: 'Vue',
+    },
+    {
+      label: 'Redux',
+      value: 'Redux',
+    },
+  ],
 };
 export const SubSkills: MultiSelectOptions[] = [
   {
@@ -530,7 +613,7 @@ export const TimeZoneList: MultiSelectOptions[] = [
     value: 'All',
   },
 ];
-export const PrizeList = ['First', 'Second', 'Third', 'Forth', 'Fifth'];
+export const PrizeList = ['first', 'second', 'third', 'forth', 'fifth'];
 
 export const ListingTypeQueryMap = {
   Jobs: 'jobs',
@@ -783,7 +866,11 @@ export const CountryList: string[] = [
 export const CommunityList: string[] = [
   'LamportDAO',
   "Grape / Dean's List",
-  'Superteam',
+  'Superteam India',
+  'Superteam Mexico',
+  'Superteam Vietnam',
+  'Superteam Germany',
+  'Superteam Turkey',
   'SuperWomenDao',
   'DeveloperDAO',
   'Metacamp',
@@ -814,9 +901,14 @@ export const web3Exp = [
 
 export const workExp = [
   '0 Years',
-  '>2 Years',
+  '<2 Years',
   '2 to 5 Years',
   '5 to 9 Years',
-  '<9 Years',
+  '>9 Years',
 ];
-export const workType = ['Freelance', 'Fulltime', 'Internship'];
+export const workType = [
+  'Not looking for Work',
+  'Freelance',
+  'Fulltime',
+  'Internship',
+];

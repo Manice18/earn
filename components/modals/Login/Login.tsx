@@ -30,6 +30,11 @@ interface Props {
   setUserInfo: (userInfo: User) => void;
   wallets: Wallet[];
   initialStep?: number;
+  inviteInfo?: {
+    emailInvite?: string;
+    currentSponsorId?: string;
+    memberType?: 'MEMBER' | 'ADMIN';
+  };
 }
 export const Login = ({
   isOpen,
@@ -39,6 +44,7 @@ export const Login = ({
   setUserInfo,
   wallets,
   initialStep = 1,
+  inviteInfo,
 }: Props) => {
   const router = useRouter();
   const [step, setStep] = useState(initialStep);
@@ -48,7 +54,11 @@ export const Login = ({
   });
 
   useEffect(() => {
-    if (userInfo?.publicKey && !userInfo?.email && step !== 2) {
+    if (
+      userInfo?.publicKey &&
+      (!userInfo?.email || !userInfo?.isVerified) &&
+      step !== 2
+    ) {
       setStep(2);
     }
   }, [userInfo]);
@@ -73,7 +83,7 @@ export const Login = ({
             />
           </Flex>
         </ModalHeader>
-        {step === 1 && <ModalCloseButton />}
+        <ModalCloseButton />
         <ModalBody>
           {step === 1 && (
             <ConnectWallet
@@ -83,6 +93,7 @@ export const Login = ({
           )}
           {step === 2 && (
             <NewUserInfo
+              inviteInfo={inviteInfo}
               userInfo={userInfo}
               setUserInfo={setUserInfo}
               setStep={setStep}
@@ -90,7 +101,12 @@ export const Login = ({
             />
           )}
           {step === 3 && (
-            <VerifyOtp userInfo={userInfo} onClose={onClose} otp={otp} />
+            <VerifyOtp
+              inviteInfo={inviteInfo}
+              userInfo={userInfo}
+              onClose={onClose}
+              otp={otp}
+            />
           )}
         </ModalBody>
         <ModalFooter>

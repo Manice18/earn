@@ -18,6 +18,7 @@ export default async function user(req: NextApiRequest, res: NextApiResponse) {
     });
     res.status(200).json(result);
   } catch (error: any) {
+    console.log('file: create.ts:21 ~ user ~ error:', error);
     if (error.code === 'P2002') {
       try {
         const currentUser = await prisma.user.findUnique({
@@ -25,6 +26,7 @@ export default async function user(req: NextApiRequest, res: NextApiResponse) {
             email,
           },
           select: {
+            id: true,
             email: true,
             publicKey: true,
           },

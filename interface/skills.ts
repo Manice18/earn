@@ -1,5 +1,3 @@
-import type { SubSkills } from '@/constants';
-
 type MainSkills =
   | 'Frontend'
   | 'Backend'
@@ -59,13 +57,18 @@ type Skills = {
   skills: MainSkills;
   subskills: SubSkillsType[];
 }[];
+
+interface SkillsProp {
+  mainskill: MainSkills;
+  subskills: SubSkillsType[];
+}
+
 type SkillMap = {
   mainskill: MainSkills;
   color: string;
 };
 
-export type { MainSkills, SubSkills };
-export type { SkillMap, Skills };
+export type { MainSkills, SkillMap, Skills, SkillsProp, SubSkillsType };
 
 export const SkillList: {
   mainskill: MainSkills;
@@ -75,13 +78,7 @@ export const SkillList: {
   {
     mainskill: 'Frontend',
     subskills: ['React', 'Angular', 'Vue', 'Redux'],
-    variations: [
-      'Frontend',
-      'Front-End Dev',
-      'FrontEnd Dev',
-      'Frontend Dev',
-      'Front-End-Dev',
-    ],
+    variations: ['Frontend', 'Front-End Dev', 'FrontEnd Dev', 'Frontend Dev'],
   },
   {
     mainskill: 'Backend',
@@ -102,13 +99,7 @@ export const SkillList: {
       'Vue',
       'Redux',
     ],
-    variations: [
-      'Backend',
-      'Back-End Dev',
-      'BackEnd Dev',
-      'Backend Dev',
-      'Back-End-Dev',
-    ],
+    variations: ['Backend', 'Back-End Dev', 'BackEnd Dev', 'Backend Dev'],
   },
   {
     mainskill: 'Design',
@@ -119,17 +110,12 @@ export const SkillList: {
       'Game Design',
       'Presentation Design',
     ],
-    variations: ['Design'],
+    variations: ['Desgin'],
   },
   {
     mainskill: 'Mobile',
     subskills: ['Android', 'iOS', 'Flutter', 'ReactNative'],
-    variations: [
-      'Mobile Engineer',
-      'Mobile Dev',
-      'Mobile Developer',
-      'Mobile-Engineer',
-    ],
+    variations: ['Mobile Engineer', 'Mobile Dev', 'Mobile Developer'],
   },
   {
     mainskill: 'Fullstack',
@@ -146,23 +132,12 @@ export const SkillList: {
       'Postgres',
       'MongoDB',
     ],
-    variations: [
-      'Fullstack',
-      'FullStack',
-      'FullStack Dev',
-      'Fullstack Dev',
-      'Fullstack-Dev',
-    ],
+    variations: ['Fullstack', 'FullStack', 'FullStack Dev', 'Fullstack Dev'],
   },
   {
     mainskill: 'Blockchain',
     subskills: ['Rust', 'Solidity', 'Sway', 'Move'],
-    variations: [
-      'Blockchain',
-      'Blockchain Dev',
-      'Blockchain Developer',
-      'Blockchain-Dev',
-    ],
+    variations: ['Blockchain', 'Blockchain Dev', 'Blockchain Developer'],
   },
   {
     mainskill: 'Content',

@@ -42,7 +42,7 @@ function CategoryPage({ category, filter }: Props) {
         params: {
           category,
           filter,
-          take: category !== 'all' ? 30 : 5,
+          take: category !== 'all' ? 100 : 5,
         },
       });
       setListings(listingsData.data);
@@ -109,7 +109,7 @@ function CategoryPage({ category, filter }: Props) {
               listings?.bounties?.map((bounty) => {
                 return (
                   <BountiesCard
-                    slug={bounty.slug}
+                    slug={bounty?.slug}
                     status={bounty?.status}
                     rewardAmount={bounty?.rewardAmount}
                     key={bounty?.id}
@@ -156,10 +156,10 @@ function CategoryPage({ category, filter }: Props) {
                     sponsorName={grant?.sponsor?.name}
                     logo={grant?.sponsor?.logo}
                     key={grant?.id}
+                    slug={grant.slug}
                     rewardAmount={grant?.rewardAmount}
-                    token={grant?.token}
                     title={grant?.title}
-                    link={grant?.link}
+                    short_description={grant?.shortDescription}
                   />
                 );
               })}

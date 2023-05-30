@@ -153,13 +153,11 @@ const Sponsor = () => {
             h="3.125rem"
             color="bg.100"
             fontSize="1.125rem"
-            bg="white"
             borderRadius="0.625rem"
             onClick={() => {
-              // alert('')
-              // router.push('/new')
-              window.location.href = '/sponsor/create';
+              window.location.href = '/new/sponsor';
             }}
+            variant="solid"
           >
             Get Started
           </Button>
@@ -548,10 +546,9 @@ const Sponsor = () => {
               bg={'#6562FF'}
               borderRadius="0.625rem"
               onClick={() => {
-                // router.push('/new')
-                window.location.href = '/sponsor/create';
+                window.location.href = '/new/sponsor';
               }}
-              variant="primary"
+              variant={'solid'}
             >
               Get Started
             </Button>
@@ -627,11 +624,7 @@ const Sponsor = () => {
         bg={navbarBg ? 'white' : 'transparent'}
       >
         <Box minW={'0.8125rem'} h="0.8125rem">
-          <img
-            src="/assets/logo/logo.png"
-            alt="Logo"
-            style={{ width: '100%', height: '100%' }}
-          />
+          <img src="/assets/logo/new-logo.svg" alt="Logo" />
         </Box>
 
         <Flex
@@ -668,11 +661,9 @@ const Sponsor = () => {
           bg={'#6562FF'}
           borderRadius="0.625rem"
           onClick={() => {
-            // alert('')
-            // router.push('/new')
-            window.location.href = '/sponsor/create';
+            window.location.href = '/new/sponsor';
           }}
-          variant="primary"
+          variant="solid"
         >
           Get Started
         </Button>

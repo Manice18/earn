@@ -40,7 +40,7 @@ function CategoryHomePage({ category }: Props) {
       const listingsData = await axios.get('/api/listings/', {
         params: {
           category,
-          take: 30,
+          take: 100,
         },
       });
       setListings(listingsData.data);
@@ -107,7 +107,7 @@ function CategoryHomePage({ category }: Props) {
               listings?.bounties?.map((bounty) => {
                 return (
                   <BountiesCard
-                    slug={bounty.slug}
+                    slug={bounty?.slug}
                     status={bounty?.status}
                     rewardAmount={bounty?.rewardAmount}
                     key={bounty?.id}
@@ -151,13 +151,13 @@ function CategoryHomePage({ category }: Props) {
               listings?.grants?.map((grant) => {
                 return (
                   <GrantsCard
+                    slug={grant.slug}
                     sponsorName={grant?.sponsor?.name}
                     logo={grant?.sponsor?.logo}
                     key={grant?.id}
                     rewardAmount={grant?.rewardAmount}
-                    token={grant?.token}
+                    short_description={grant?.shortDescription}
                     title={grant?.title}
-                    link={grant?.link}
                   />
                 );
               })}

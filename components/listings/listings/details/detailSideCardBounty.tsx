@@ -16,6 +16,7 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react';
+import type { BountyType } from '@prisma/client';
 import axios from 'axios';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -24,6 +25,7 @@ import Countdown from 'react-countdown';
 import LoginWrapper from '@/components/Header/LoginWrapper';
 import { VerticalStep } from '@/components/misc/steps';
 import { SubmissionModal } from '@/components/modals/submissionModalBounty';
+import WarningModal from '@/components/shared/WarningModal';
 import { tokenList } from '@/constants/index';
 import type { Eligibility, Rewards } from '@/interface/bounty';
 import { userStore } from '@/store/user';
@@ -41,6 +43,9 @@ interface Props {
   token?: string;
   questions?: string;
   eligibility?: Eligibility[];
+  type?: BountyType | string;
+  bountytitle: string;
+  requirements?: string;
 }
 function DetailSideCard({
   id,
@@ -50,6 +55,9 @@ function DetailSideCard({
   token,
   eligibility,
   applicationLink,
+  bountytitle,
+  requirements,
+  type,
 }: Props) {
   const { userInfo } = userStore();
   const [isSubmissionNumberLoading, setIsSubmissionNumberLoading] =
@@ -57,6 +65,11 @@ function DetailSideCard({
   const [submissionNumber, setSubmissionNumber] = useState(0);
   const [isUserSubmissionLoading, setIsUserSubmissionLoading] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: warningIsOpen,
+    onOpen: warningOnOpen,
+    onClose: warningOnClose,
+  } = useDisclosure();
   const [triggerLogin, setTriggerLogin] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   let submissionStatus = 0;
@@ -107,10 +120,12 @@ function DetailSideCard({
       window.open(applicationLink, '_blank');
       return;
     }
-    if (userInfo?.id) {
-      onOpen();
-    } else {
+    if (!userInfo?.id) {
       setTriggerLogin(true);
+    } else if (!userInfo?.isTalentFilled) {
+      warningOnOpen();
+    } else {
+      onOpen();
     }
   };
 
@@ -119,12 +134,26 @@ function DetailSideCard({
       {isOpen && (
         <SubmissionModal
           id={id}
+          type={type}
           eligibility={eligibility || []}
           onClose={onClose}
           isOpen={isOpen}
           submissionNumber={submissionNumber}
           setSubmissionNumber={setSubmissionNumber}
           setIsSubmitted={setIsSubmitted}
+          bountytitle={bountytitle}
+        />
+      )}
+      {warningIsOpen && (
+        <WarningModal
+          isOpen={warningIsOpen}
+          onClose={warningOnClose}
+          title={'Complete your profile'}
+          bodyText={
+            'Please complete your profile before submitting to a bounty.'
+          }
+          primaryCtaText={'Complete Profile'}
+          primaryCtaLink={'/new/talent'}
         />
       )}
       <LoginWrapper
@@ -391,7 +420,7 @@ function DetailSideCard({
           </VStack>
           <Flex justify={'space-between'} w={'full'} px={5}>
             <Flex align={'start'} justify={'center'} direction={'column'}>
-              <Flex align={'center'} justify={'center'} gap={1}>
+              <Flex align={'center'} justify={'center'} gap={2}>
                 <Image
                   w={'1.4rem'}
                   mt={-1}
@@ -447,17 +476,31 @@ function DetailSideCard({
             ) : (
               <Button
                 w="full"
+                _hover={{
+                  bg: 'brand.purple',
+                }}
+                isDisabled={Date.now() > Number(moment(endingTime).format('x'))}
                 isLoading={isUserSubmissionLoading}
                 loadingText={'Checking Submission...'}
                 onClick={() => handleSubmit()}
                 size="lg"
                 variant="solid"
               >
-                Submit Now
+                {type === 'permissioned' ? 'Apply Now' : 'Submit Now'}
               </Button>
             )}
           </Box>
         </VStack>
+        {requirements && (
+          <VStack align="start" w={'22rem'} p={4} bg="white" rounded={'xl'}>
+            <Text mb={1} color="gray.500" fontSize={'lg'} fontWeight={600}>
+              ELIGIBILITY
+            </Text>
+            <Text color={'gray.500'} fontSize={'md'} fontWeight={400}>
+              {requirements}
+            </Text>
+          </VStack>
+        )}
         <VStack
           align={'start'}
           justify={'center'}
@@ -497,7 +540,9 @@ function DetailSideCard({
           <VerticalStep
             currentStep={submissionStatus + 1}
             thisStep={3}
-            sublabel={`On ${moment(endingTime).format('Do MMM, YY')}`}
+            sublabel={`Around ${moment(endingTime)
+              .add(8, 'd')
+              .format('Do MMM, YY')}`}
             label={'Winner Announced'}
           />
         </VStack>

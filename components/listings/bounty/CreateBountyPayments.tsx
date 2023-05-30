@@ -1,4 +1,4 @@
-import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
+import { AddIcon, ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
 import {
   Button,
   Flex,
@@ -11,26 +11,32 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
+  useDisclosure,
   VStack,
 } from '@chakra-ui/react';
-import axios from 'axios';
 import type { Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 
-import type { MultiSelectOptions } from '../../../constants';
-import { PrizeList, tokenList } from '../../../constants';
-import type { PrizeListType } from '../../../interface/listings';
-import { PrizeLabels } from '../../../interface/types';
-import { createQuestions } from '../../../utils/functions';
-import { genrateuuid } from '../../../utils/helpers';
+import type { MultiSelectOptions } from '@/constants';
+import { PrizeList, tokenList } from '@/constants';
+
 import type { BountyBasicType } from './Createbounty';
 import type { Ques } from './questions/builder';
 
 interface PrizeListInterface {
+  value: string;
   label: string;
   placeHolder: number;
+  defaultValue?: number;
 }
 interface Props {
   bountyBasic: BountyBasicType | undefined;
@@ -39,126 +45,76 @@ interface Props {
   subSkills: MultiSelectOptions[];
   onOpen: () => void;
   draftLoading: boolean;
-  createDraft: (payment: string) => void;
+  createDraft: () => void;
   setSlug: Dispatch<SetStateAction<string>>;
   questions: Ques[];
+  createAndPublishListing: () => void;
+  isListingPublishing: boolean;
+  bountyPayment: any;
+  setBountyPayment: Dispatch<SetStateAction<any | undefined>>;
+  isEditMode: boolean;
 }
 export const CreatebountyPayment = ({
-  bountyBasic,
-  onOpen,
   createDraft,
   draftLoading,
-  setSlug,
-  questions,
+  createAndPublishListing,
+  isListingPublishing,
+  bountyPayment,
+  setBountyPayment,
+  isEditMode,
 }: Props) => {
+  const {
+    isOpen: confirmIsOpen,
+    onOpen: confirmOnOpen,
+    onClose: confirmOnClose,
+  } = useDisclosure();
   // handles which token is selected
-  const [tokenIndex, setTokenIndex] = useState<number>(0);
+  const defaultTokenIndex = tokenList?.findIndex(
+    (t) => t.tokenSymbol === bountyPayment.token
+  );
+  const [tokenName, setTokenName] = useState(
+    defaultTokenIndex >= 0
+      ? tokenList[defaultTokenIndex]?.tokenSymbol
+      : tokenList[0]?.tokenSymbol || ''
+  );
+  const [tokenIndex, setTokenIndex] = useState<number>(
+    defaultTokenIndex >= 0 ? defaultTokenIndex : 0
+  );
+  const [totalReward, setTotalReward] = useState<number | undefined>(
+    bountyPayment?.rewardAmount || undefined
+  );
 
   // stores the state for prize
-  const [prizevalues, setPrizevalues] = useState<Object>({});
+  const [prizevalues, setPrizevalues] = useState<any>(
+    bountyPayment?.rewards || {}
+  );
 
   // handles the UI for prize
-  const [prizes, setPrizes] = useState<PrizeListInterface[]>([
-    {
-      label: 'First prize',
-      placeHolder: 2500,
-    },
-  ]);
-  // sponsor
-  const [loading, setLoading] = useState<boolean>(false);
-  const defaultQuestionPremission: Ques[] = [
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Discord Username',
-      question: 'Discord Username',
-      type: 'text',
-      options: [],
-    },
+  const prizesList = Object.keys(bountyPayment?.rewards || [])?.map((r) => ({
+    value: r,
+    label: `${r} prize`,
+    placeHolder: bountyPayment?.rewards[r],
+    defaultValue: bountyPayment?.rewards[r],
+  }));
+  const [prizes, setPrizes] = useState<PrizeListInterface[]>(
+    prizesList?.length
+      ? prizesList
+      : [
+          {
+            value: 'first',
+            label: 'first prize',
+            placeHolder: 2500,
+          },
+        ]
+  );
 
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'link',
-      question: 'Profile Link',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'SOL Wallet',
-      question: 'SOL Wallet',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Email',
-      question: 'Your email address',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Twitter',
-      question: 'Your Twitter Handle',
-      type: 'text',
-      options: [],
-    },
-  ];
-  const defaultQuestionPremissionLess: Ques[] = [
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Discord Username',
-      question: 'Discord Username',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Tweet Link',
-      question: 'Tweet Link',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'link',
-      question: 'Application Link',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'SOL Wallet',
-      question: 'SOL Wallet',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Email',
-      question: 'Your email address',
-      type: 'text',
-      options: [],
-    },
-    {
-      delete: false,
-      id: genrateuuid(),
-      label: 'Twitter',
-      question: 'Your Twitter Handle',
-      type: 'text',
-      options: [],
-    },
-  ];
+  useEffect(() => {
+    setBountyPayment({
+      rewardAmount: totalReward,
+      token: tokenName,
+      rewards: prizevalues,
+    });
+  }, [prizevalues, totalReward, tokenName]);
 
   const handleButtonClick = () => {
     const temp: PrizeListInterface[] = prizes.filter((_el, index) => {
@@ -170,47 +126,38 @@ export const CreatebountyPayment = ({
 
     setPrizes(temp);
   };
-  const onSubmit = async () => {
-    setLoading(true);
-    const Prizevalues = Object.values(prizevalues as Object);
-    if (Prizevalues.length <= 0) {
-      toast.error('Please add atleast one prize');
-      return;
-    }
 
-    let Prizes: Partial<PrizeListType> = Object();
-    prizes.forEach((_el, index: number) => {
-      const Prize: any = {};
-      if (!PrizeLabels[index]) {
-        Prize[PrizeLabels[index]!] = Prizevalues[index];
-      }
-      Prizes = {
-        ...Prizes,
-        ...Prize,
-      };
-    });
-    const bountyId = genrateuuid();
-    const questionsRes = await createQuestions({
-      id: genrateuuid(),
-      bountiesId: bountyId,
-      questions:
-        bountyBasic?.eligibility === 'premission'
-          ? JSON.stringify([...defaultQuestionPremission, ...questions])
-          : JSON.stringify([...defaultQuestionPremissionLess]),
-    });
-
-    if (questionsRes) {
-      await axios.post('/api/updateSearch');
-      onOpen();
-      setSlug(`/bounties/${bountyBasic?.title.split(' ').join('-')}` as string);
-      setLoading(false);
-    } else {
-      toast.error('Error creating bounty, please try again later.');
-      setLoading(false);
-    }
-  };
   return (
     <>
+      <Modal isOpen={confirmIsOpen} onClose={confirmOnClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Publish?</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              Creating this Listing will publish it for everyone to see. Make
+              sure your Listing is ready before you publish.
+            </Text>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button mr={4} onClick={confirmOnClose} variant="ghost">
+              Close
+            </Button>
+            <Button
+              mr={3}
+              colorScheme="blue"
+              disabled={isListingPublishing}
+              isLoading={isListingPublishing}
+              loadingText="Publishing..."
+              onClick={() => createAndPublishListing()}
+            >
+              Create & Publish
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <VStack
         align={'start'}
         gap={2}
@@ -264,6 +211,7 @@ export const CreatebountyPayment = ({
                       key={token.mintAddress}
                       onClick={() => {
                         setTokenIndex(index);
+                        setTokenName(token?.tokenSymbol);
                       }}
                     >
                       <HStack>
@@ -282,18 +230,52 @@ export const CreatebountyPayment = ({
             </MenuList>
           </Menu>
         </FormControl>
-        <VStack gap={2} w={'full'} mt={5}>
+        <FormControl w="full" isRequired>
+          <Flex>
+            <FormLabel
+              color={'brand.slate.500'}
+              fontSize={'15px'}
+              fontWeight={600}
+              htmlFor={'slug'}
+            >
+              Total Reward Amount (in {tokenName})
+            </FormLabel>
+          </Flex>
+
+          <Input
+            borderColor="brand.slate.300"
+            _placeholder={{
+              color: 'brand.slate.300',
+            }}
+            defaultValue={totalReward}
+            focusBorderColor="brand.purple"
+            onChange={(e) => {
+              setTotalReward(parseInt(e.target.value, 10));
+            }}
+            placeholder="4,000"
+            type="number"
+          />
+        </FormControl>
+        <VStack gap={4} w={'full'} mt={5} mb={8}>
           {prizes.map((el, index) => {
             return (
               <FormControl key={el.label}>
-                <FormLabel color={'gray.500'}>{el.label}</FormLabel>
+                <FormLabel color={'gray.500'} textTransform="capitalize">
+                  {el.label}
+                </FormLabel>
                 <Flex gap={3}>
                   <Input
-                    color="gray.700"
+                    color="brand.slate.500"
+                    borderColor="brand.slate.300"
+                    _placeholder={{
+                      color: 'brand.slate.300',
+                    }}
+                    defaultValue={el.defaultValue}
+                    focusBorderColor="brand.purple"
                     onChange={(e) => {
                       setPrizevalues({
                         ...(prizevalues as Object),
-                        [el.label]: e.target.value,
+                        [el.value]: parseInt(e.target.value, 10),
                       });
                     }}
                     placeholder={JSON.stringify(el.placeHolder)}
@@ -310,56 +292,45 @@ export const CreatebountyPayment = ({
           })}
           <Button
             w="full"
-            bg={'transparent'}
-            border={'1px solid #e2e8f0'}
             isDisabled={prizes.length === 5 && true}
+            leftIcon={<AddIcon />}
             onClick={() => {
               setPrizes([
                 ...prizes,
                 {
+                  value: PrizeList[prizes.length] || 'first',
                   label: `${PrizeList[prizes.length]} prize`,
                   placeHolder: (5 - prizes.length) * 500,
                 },
               ]);
             }}
+            variant="ghost"
           >
             Add Prize
           </Button>
         </VStack>
         <Toaster />
-        <VStack gap={6} w={'full'} mt={10}>
+        <VStack gap={4} w={'full'} pt={10}>
+          {!isEditMode && (
+            <Button
+              w="100%"
+              disabled={isListingPublishing}
+              isLoading={isListingPublishing}
+              onClick={confirmOnOpen}
+              variant={'solid'}
+            >
+              Create & Publish Listing
+            </Button>
+          )}
           <Button
             w="100%"
-            color={'white'}
-            fontSize="1rem"
-            fontWeight={600}
-            bg={'#6562FF'}
-            _hover={{ bg: '#6562FF' }}
-            disabled={loading}
-            isLoading={loading}
-            onClick={onSubmit}
-          >
-            Finish the Listing
-          </Button>
-          <Button
-            w="100%"
-            color="gray.500"
-            fontSize="1rem"
-            fontWeight={600}
-            bg="transparent"
-            border="1px solid"
-            borderColor="gray.200"
             isLoading={draftLoading}
             onClick={() => {
-              createDraft(
-                JSON.stringify({
-                  prizevalues,
-                  token: tokenList[tokenIndex as number]?.mintAddress,
-                })
-              );
+              createDraft();
             }}
+            variant={isEditMode ? 'solid' : 'outline'}
           >
-            Save as Drafts
+            {isEditMode ? 'Update' : 'Save as Draft'}
           </Button>
         </VStack>
       </VStack>

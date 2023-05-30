@@ -3,15 +3,15 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
-import { genrateuuid } from '../../../../utils/helpers';
 import { QuestionCard } from './questionCard';
 
 interface Props {
   setSteps: Dispatch<SetStateAction<number>>;
   draftLoading: boolean;
-  createDraft: (payment: string) => void;
+  createDraft: () => void;
   questions: Ques[];
   setQuestions: Dispatch<SetStateAction<Ques[]>>;
+  isEditMode: boolean;
 }
 export type QuestionType =
   | 'text'
@@ -21,15 +21,15 @@ export type QuestionType =
   | 'multi-choice'
   | 'url';
 export interface Ques {
-  id: string;
+  order: number;
   question: string;
   type: QuestionType;
-  delete: boolean;
+  delete?: boolean;
   options?: string[];
   label: string;
 }
 type ErrorState = {
-  id: string;
+  order: number;
   errMessage: string;
 };
 const Builder = ({
@@ -38,6 +38,7 @@ const Builder = ({
   draftLoading,
   questions,
   setQuestions,
+  isEditMode,
 }: Props) => {
   const [error, setError] = useState<ErrorState[]>([]);
   return (
@@ -78,11 +79,9 @@ const Builder = ({
             setQuestions([
               ...questions,
               {
-                id: genrateuuid(),
+                order: (questions?.length || 0) + 1,
                 question: '',
                 type: 'text',
-                options: [],
-                delete: true,
                 label: '',
               },
             ]);
@@ -94,11 +93,6 @@ const Builder = ({
         <VStack gap={6} w={'full'} pt={10}>
           <Button
             w="100%"
-            color={'white'}
-            fontSize="1rem"
-            fontWeight={600}
-            bg={'#6562FF'}
-            _hover={{ bg: '#6562FF' }}
             onClick={() => {
               if (questions.length === 0) {
                 toast.error('Add minimun of one question');
@@ -116,7 +110,7 @@ const Builder = ({
                     setError([
                       ...error,
                       {
-                        id: e.id,
+                        order: e.order,
                         errMessage:
                           'Please add at least one more option for this question',
                       },
@@ -128,7 +122,7 @@ const Builder = ({
                     setError([
                       ...error,
                       {
-                        id: e.id,
+                        order: e.order,
                         errMessage:
                           'Please add at least one more option for this question',
                       },
@@ -144,7 +138,7 @@ const Builder = ({
                   setError([
                     ...error,
                     {
-                      id: e.id,
+                      order: e.order,
                       errMessage: 'Add question',
                     },
                   ]);
@@ -156,23 +150,19 @@ const Builder = ({
                 setSteps(5);
               }
             }}
+            variant="solid"
           >
             Continue
           </Button>
           <Button
             w="100%"
-            color="gray.500"
-            fontSize="1rem"
-            fontWeight={600}
-            bg="transparent"
-            border="1px solid"
-            borderColor="gray.200"
             isLoading={draftLoading}
             onClick={() => {
-              createDraft('nothing');
+              createDraft();
             }}
+            variant="outline"
           >
-            Save as Drafts
+            {isEditMode ? 'Update' : 'Save as Draft'}
           </Button>
         </VStack>
       </VStack>

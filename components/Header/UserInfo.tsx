@@ -2,10 +2,12 @@ import {
   Box,
   Button,
   Flex,
+  HStack,
   Image,
   Menu,
   MenuButton,
   MenuDivider,
+  MenuGroup,
   MenuItem,
   MenuList,
   Text,
@@ -117,16 +119,53 @@ function UserInfo() {
               </Flex>
             </MenuButton>
             <MenuList>
-              <MenuItem
-                color="brand.slate.500"
-                fontSize="sm"
-                fontWeight={600}
-                onClick={() => {
-                  router.push(`/t/${userInfo?.username}`);
-                }}
-              >
-                Profile
-              </MenuItem>
+              {userInfo?.isTalentFilled && (
+                <MenuItem
+                  color="brand.slate.500"
+                  fontSize="sm"
+                  fontWeight={600}
+                  onClick={() => {
+                    router.push(`/t/${userInfo?.username}`);
+                  }}
+                >
+                  Profile
+                </MenuItem>
+              )}
+              {(userInfo?.role === 'GOD' || !!userInfo?.currentSponsorId) && (
+                <MenuItem
+                  color="brand.slate.500"
+                  fontSize="sm"
+                  fontWeight={600}
+                  onClick={() => {
+                    router.push('/dashboard/bounties');
+                  }}
+                >
+                  Sponsor Dashboard
+                </MenuItem>
+              )}
+              {userInfo?.role === 'GOD' && (
+                <>
+                  <MenuDivider />
+                  <MenuGroup
+                    ml={3}
+                    color="brand.slate.700"
+                    fontSize="xs"
+                    fontWeight={700}
+                    title="God Mode"
+                  >
+                    <MenuItem
+                      color="brand.slate.500"
+                      fontSize="sm"
+                      fontWeight={600}
+                      onClick={() => {
+                        router.push('/new/sponsor');
+                      }}
+                    >
+                      Create New Sponsor
+                    </MenuItem>
+                  </MenuGroup>
+                </>
+              )}
               <MenuDivider />
               <MenuItem
                 color="red.500"
@@ -143,29 +182,44 @@ function UserInfo() {
         </>
       ) : (
         <>
-          <Button
-            px={5}
-            fontSize="xs"
-            onClick={() => {
-              onOpen();
-            }}
-            size="sm"
-            variant={{ base: 'solid', md: 'ghost' }}
-          >
-            Login
-          </Button>
-          <Button
-            display={{ base: 'none', md: 'block' }}
-            px={4}
-            fontSize="xs"
-            onClick={() => {
-              onOpen();
-            }}
-            size="sm"
-            variant="solid"
-          >
-            Sign Up
-          </Button>
+          <HStack gap={2}>
+            <HStack gap={0}>
+              <Button
+                display={{ base: 'none', md: 'block' }}
+                fontSize="xs"
+                onClick={() => {
+                  router.push('/sponsor');
+                }}
+                size="sm"
+                variant={{ base: 'solid', md: 'ghost' }}
+              >
+                Create A Bounty
+              </Button>
+              <Button
+                display={{ base: 'none', md: 'block' }}
+                fontSize="xs"
+                onClick={() => {
+                  onOpen();
+                }}
+                size="sm"
+                variant={{ base: 'solid', md: 'ghost' }}
+              >
+                Login
+              </Button>
+            </HStack>
+            <Button
+              display={{ base: 'none', md: 'block' }}
+              px={4}
+              fontSize="xs"
+              onClick={() => {
+                onOpen();
+              }}
+              size="sm"
+              variant="solid"
+            >
+              Sign Up
+            </Button>
+          </HStack>
         </>
       )}
     </>

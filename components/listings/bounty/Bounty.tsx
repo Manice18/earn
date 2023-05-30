@@ -1,42 +1,59 @@
 import { useDisclosure } from '@chakra-ui/react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import axios from 'axios';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
-import type { BountyBasicType } from '../../components/listings/bounty/Createbounty';
-import { Createbounty } from '../../components/listings/bounty/Createbounty';
-import type { Ques } from '../../components/listings/bounty/questions/builder';
-import { CreateGrants } from '../../components/listings/grants/CreateGrants';
-import { CreateJob } from '../../components/listings/jobs/CreateJob';
-import Template from '../../components/listings/templates/template';
-import { CreateSponsorModel } from '../../components/modals/createSponsor';
-import { SuccessListings } from '../../components/modals/successListings';
-import type { MultiSelectOptions } from '../../constants';
+import type { BountyBasicType } from '@/components/listings/bounty/Createbounty';
+import { CreateBounty } from '@/components/listings/bounty/Createbounty';
 import type {
-  DraftType,
-  GrantsBasicType,
-  JobBasicsType,
-} from '../../interface/listings';
-import { ConnectWallet } from '../../layouts/connectWallet';
-import FormLayout from '../../layouts/FormLayout';
-import { SponsorStore } from '../../store/sponsor';
-import { userStore } from '../../store/user';
-import { CreateDraft, findOneDraft } from '../../utils/functions';
-import { genrateuuid } from '../../utils/helpers';
+  Ques,
+  QuestionType,
+} from '@/components/listings/bounty/questions/builder';
+import { CreateGrants } from '@/components/listings/grants/CreateGrants';
+import { CreateJob } from '@/components/listings/jobs/CreateJob';
+import Template from '@/components/listings/templates/template';
+import { SuccessListings } from '@/components/modals/successListings';
+import ErrorSection from '@/components/shared/ErrorSection';
+import type { MultiSelectOptions } from '@/constants';
+import type { Bounty } from '@/interface/bounty';
+import type { GrantsBasicType, JobBasicsType } from '@/interface/listings';
+import FormLayout from '@/layouts/FormLayout';
+import { userStore } from '@/store/user';
+import { dayjs } from '@/utils/dayjs';
+import { findOneDraft } from '@/utils/functions';
+import { mergeSkills, splitSkills } from '@/utils/skills';
 
-const CreateListing = () => {
+interface Props {
+  bounty?: Bounty;
+  isEditMode?: boolean;
+}
+
+function CreateListing({ bounty, isEditMode = false }: Props) {
+  const router = useRouter();
+  const { userInfo } = userStore();
   // Templates - 1
   // Basic Info - 2
   // Description - 3
   // payment form - 4
-  const [steps, setSteps] = useState<number>(1);
-  const router = useRouter();
+  const [steps, setSteps] = useState<number>(isEditMode ? 2 : 1);
+  const [listingType, setListingType] = useState('BOUNTY');
   const [draftLoading, setDraftLoading] = useState<boolean>(false);
-  const [editorData, setEditorData] = useState<string | undefined>();
+  const [bountyRequirements, setBountyRequirements] = useState<
+    string | undefined
+  >(isEditMode ? bounty?.requirements : undefined);
+  const [editorData, setEditorData] = useState<string | undefined>(
+    isEditMode ? bounty?.description : undefined
+  );
+
   //
-  const [mainSkills, setMainSkills] = useState<MultiSelectOptions[]>([]);
-  const [subSkill, setSubSkill] = useState<MultiSelectOptions[]>([]);
+  const skillsInfo = isEditMode ? splitSkills(bounty?.skills || []) : undefined;
+  const [mainSkills, setMainSkills] = useState<MultiSelectOptions[]>(
+    isEditMode ? skillsInfo?.skills || [] : []
+  );
+  const [subSkill, setSubSkill] = useState<MultiSelectOptions[]>(
+    isEditMode ? skillsInfo?.subskills || [] : []
+  );
   const [slug, setSlug] = useState<string>('');
   //
   const { isOpen, onOpen } = useDisclosure();
@@ -48,77 +65,104 @@ const CreateListing = () => {
     type: 'fulltime',
   });
 
-  const [questions, setQuestions] = useState<Ques[]>([]);
+  const [questions, setQuestions] = useState<Ques[]>(
+    isEditMode
+      ? (bounty?.eligibility || [])?.map((e) => ({
+          order: e.order,
+          question: e.question,
+          type: e.type as QuestionType,
+          delete: true,
+          label: e.question,
+        }))
+      : []
+  );
 
   // - Bounty
-  const [bountybasic, setBountyBasic] = useState<BountyBasicType | undefined>();
+  const [bountybasic, setBountyBasic] = useState<BountyBasicType | undefined>({
+    title: isEditMode ? bounty?.title || undefined : undefined,
+    slug: isEditMode ? bounty?.slug || undefined : undefined,
+    deadline:
+      isEditMode && bounty?.deadline
+        ? dayjs(bounty?.deadline).format('YYYY-MM-DDTHH:mm') || undefined
+        : undefined,
+    type: isEditMode ? bounty?.type || undefined : undefined,
+  });
+  const [bountyPayment, setBountyPayment] = useState({
+    rewardAmount: isEditMode ? bounty?.rewardAmount || 0 : 0,
+    token: isEditMode ? bounty?.token : undefined,
+    rewards: isEditMode ? bounty?.rewards || undefined : undefined,
+  });
   // -- Grants
   const [grantBasic, setgrantsBasic] = useState<GrantsBasicType | undefined>();
-  // -- wallet
-  const { connected } = useWallet();
-  // -- sponsor
-  const { currentSponsor } = SponsorStore();
-  const { userInfo } = userStore();
 
-  // const sponsors = useQuery({
-  //   queryKey: ['sponsor', publicKey?.toBase58() ?? ''],
-  //   queryFn: ({ queryKey }) => findSponsors(queryKey[1] || ''),
-  // });
+  const [isListingPublishing, setIsListingPublishing] =
+    useState<boolean>(false);
 
-  const createDraft = async (payment: string) => {
+  const createAndPublishListing = async () => {
+    setIsListingPublishing(true);
+    try {
+      const newBounty: Bounty = {
+        sponsorId: userInfo?.currentSponsor?.id ?? '',
+        pocId: userInfo?.id ?? '',
+        skills: mergeSkills({ skills: mainSkills, subskills: subSkill }),
+        ...bountybasic,
+        deadline: bountybasic?.deadline
+          ? new Date(bountybasic?.deadline).toISOString()
+          : undefined,
+        description: editorData || '',
+        eligibility: (questions || []).map((q) => ({
+          question: q.question,
+          order: q.order,
+          type: q.type,
+        })),
+        requirements: bountyRequirements,
+        ...bountyPayment,
+        isPublished: true,
+      };
+      const result = await axios.post('/api/bounties/create/', newBounty);
+      setSlug(`/bounties/${result?.data?.slug}/`);
+      onOpen();
+      setIsListingPublishing(false);
+    } catch (e) {
+      setIsListingPublishing(false);
+    }
+  };
+
+  const createDraft = async () => {
     setDraftLoading(true);
-    let draft: DraftType = {
-      id: genrateuuid(),
-      orgId: currentSponsor?.id ?? '',
-      basic: '',
-      payments: '',
-      type: 'Bounties',
+    let api = '/api/bounties/create/';
+    if (isEditMode) {
+      api = `/api/bounties/update/${bounty?.id}/`;
+    }
+    let draft: Bounty = {
+      sponsorId: userInfo?.currentSponsor?.id ?? '',
+      pocId: userInfo?.id ?? '',
     };
-    if (router.query.type === 'jobs') {
-      draft = {
+    draft = {
+      ...draft,
+      skills: mergeSkills({ skills: mainSkills, subskills: subSkill }),
+      ...bountybasic,
+      deadline: bountybasic?.deadline
+        ? new Date(bountybasic?.deadline).toISOString()
+        : undefined,
+      description: editorData || '',
+      eligibility: (questions || []).map((q) => ({
+        question: q.question,
+        order: q.order,
+        type: q.type,
+      })),
+      requirements: bountyRequirements,
+      ...bountyPayment,
+    };
+    try {
+      await axios.post(api, {
         ...draft,
-        basic: JSON.stringify({
-          skills: mainSkills,
-          subSkill,
-          description: JSON.stringify(editorData),
-          ...jobBasics,
-        }),
-        type: 'Jobs',
-        payments: payment,
-      };
-    } else if (router.query.type === 'bounties') {
-      draft = {
-        ...draft,
-        basic: JSON.stringify({
-          skills: mainSkills,
-          subSkill,
-          description: JSON.stringify(editorData),
-          ...bountybasic,
-        }),
-        type: 'Bounties',
-        payments: payment,
-        question: JSON.stringify(questions),
-      };
-    } else if (router.query.type === 'grants') {
-      draft = {
-        ...draft,
-        basic: JSON.stringify({
-          skills: mainSkills,
-          subSkill,
-          description: JSON.stringify(editorData),
-          ...grantBasic,
-        }),
-        type: 'Grants',
-        payments: payment,
-      };
+        isPublished: isEditMode ? bounty?.isPublished : false,
+      });
+      router.push('/dashboard/bounties');
+    } catch (e) {
+      setDraftLoading(false);
     }
-    const res = await CreateDraft(draft);
-    if (res) {
-      toast.success('Draft Saved');
-    } else {
-      toast.error('Error');
-    }
-    setDraftLoading(false);
   };
 
   useEffect(() => {
@@ -126,19 +170,17 @@ const CreateListing = () => {
       if (router.query.draft) {
         try {
           const res = await findOneDraft(router.query.draft as string);
-          console.log(res);
-
           if (res) {
             if ((res.data.type as string).toLowerCase() === 'bounties') {
-              console.log(JSON.parse(res.data.basic));
               const data = JSON.parse(res.data.basic);
               setSubSkill(data.subSkill);
               setMainSkills(data.skills);
               setEditorData(JSON.parse(data.description));
               setBountyBasic({
                 deadline: data.deadline ?? '',
-                eligibility: data.eligibility ?? '',
+                type: data.type ?? '',
                 title: data.title ?? '',
+                slug: data.slug ?? '',
               });
             } else if ((res.data.type as string).toLowerCase() === 'jobs') {
               const data = JSON.parse(res.data.basic);
@@ -174,24 +216,30 @@ const CreateListing = () => {
 
   return (
     <>
-      {connected ? (
+      {!userInfo?.id ||
+      !(userInfo?.role === 'GOD' || !!userInfo?.currentSponsorId) ? (
+        <ErrorSection
+          title="Access is Forbidden!"
+          message="Please contact support to access this section."
+        />
+      ) : (
         <FormLayout
           setStep={setSteps}
           currentStep={steps}
           stepList={
-            router.query.type !== 'bounties'
+            listingType !== 'BOUNTY'
               ? [
                   {
                     label: 'Template',
                     number: 1,
-                    mainHead: 'Create Your Opportunity Listing',
+                    mainHead: 'List your Opportunity',
                     description:
                       'To save time, check out our ready made templates below. If you already have a listing elsewhere, use "Start from Scratch" and copy/paste your text.',
                   },
                   {
                     label: 'Basics',
                     number: 2,
-                    mainHead: 'Create a listing',
+                    mainHead: 'Create a Listing',
                     description: `Now let's learn a bit more about the work you need completed`,
                   },
                   {
@@ -213,14 +261,14 @@ const CreateListing = () => {
                   {
                     label: 'Template',
                     number: 1,
-                    mainHead: 'Create Your Opportunity Listing',
+                    mainHead: 'List your Opportunity',
                     description:
                       'To save time, check out our ready made templates below. If you already have a listing elsewhere, use "Start from Scratch" and copy/paste your text.',
                   },
                   {
                     label: 'Basics',
                     number: 2,
-                    mainHead: 'Create a listing',
+                    mainHead: 'Create a Listing',
                     description: `Now let's learn a bit more about the work you need completed`,
                   },
                   {
@@ -247,15 +295,20 @@ const CreateListing = () => {
                 ]
           }
         >
-          {!userInfo?.sponsor && (
-            <CreateSponsorModel isOpen={true} onClose={() => {}} />
-          )}
           {isOpen && (
             <SuccessListings slug={slug} isOpen={isOpen} onClose={() => {}} />
           )}
-          {steps === 1 && <Template setSteps={setSteps} />}
-          {router.query.type && router.query.type === 'bounties' && (
-            <Createbounty
+          {steps === 1 && (
+            <Template setSteps={setSteps} setListingType={setListingType} />
+          )}
+          {steps > 1 && listingType === 'BOUNTY' && (
+            <CreateBounty
+              setBountyRequirements={setBountyRequirements}
+              bountyRequirements={bountyRequirements}
+              createAndPublishListing={createAndPublishListing}
+              isListingPublishing={isListingPublishing}
+              bountyPayment={bountyPayment}
+              setBountyPayment={setBountyPayment}
               questions={questions}
               setQuestions={setQuestions}
               setSlug={setSlug}
@@ -272,9 +325,10 @@ const CreateListing = () => {
               setEditorData={setEditorData}
               setSteps={setSteps}
               steps={steps}
+              isEditMode={isEditMode}
             />
           )}
-          {router.query.type && router.query.type === 'jobs' && (
+          {steps > 1 && listingType === 'JOB' && (
             <CreateJob
               setSlug={setSlug}
               draftLoading={draftLoading}
@@ -292,7 +346,7 @@ const CreateListing = () => {
               onOpen={onOpen}
             />
           )}
-          {router.query.type && router.query.type === 'grants' && (
+          {steps > 1 && listingType === 'GRANT' && (
             <CreateGrants
               createDraft={createDraft}
               onOpen={onOpen}
@@ -311,11 +365,9 @@ const CreateListing = () => {
           )}
           <Toaster />
         </FormLayout>
-      ) : (
-        <ConnectWallet />
       )}
     </>
   );
-};
+}
 
 export default CreateListing;

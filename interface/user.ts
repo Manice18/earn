@@ -1,3 +1,6 @@
+import type { SponsorType } from '@/interface/sponsor';
+import type { UserSponsor } from '@/interface/userSponsor';
+
 interface User {
   id?: string;
   publicKey?: string;
@@ -8,6 +11,7 @@ interface User {
   isVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  role?: string;
   talent?: boolean;
   sponsor?: boolean;
   superteamLevel?: string;
@@ -31,5 +35,9 @@ interface User {
   telegram?: string;
   pow?: string;
   totalEarnedInUSD?: number;
+  currentSponsorId?: string;
+  currentSponsor?: SponsorType;
+  UserSponsors?: UserSponsor[];
+  private?: boolean;
 }
 export type { User };

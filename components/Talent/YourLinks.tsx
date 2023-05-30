@@ -355,14 +355,17 @@ function YourLinks({ success, useFormStore }: Props) {
     updateState({ pow, ...socials });
     setisLoading(true);
     try {
-      const updatedUser = await axios.post('/api/user/update', {
+      const updateOptions = {
         id: userInfo?.id,
         ...form,
         pow,
         ...socials,
         superteamLevel: 'Lurker',
         isTalentFilled: true,
-      });
+      };
+      // eslint-disable-next-line unused-imports/no-unused-vars
+      const { subSkills, ...finalOptions } = updateOptions;
+      const updatedUser = await axios.post('/api/user/update', finalOptions);
       setUserInfo(updatedUser?.data);
       success();
     } catch (e) {
@@ -395,8 +398,11 @@ function YourLinks({ success, useFormStore }: Props) {
                 <SocialInput register={register} {...sc} key={`sc${idx}`} />
               );
             })}
-            <Text mb={1} color={'brand.slate.500'} fontWeight={'500'}>
+            <Text color={'brand.slate.500'} fontWeight={'500'}>
               Other Proof of Work
+            </Text>
+            <Text mb={3} color={'brand.slate.400'} fontWeight={400}>
+              Adding more PoW increases your chance of getting work
             </Text>
             <Box>
               {pow.map((ele, idx) => {

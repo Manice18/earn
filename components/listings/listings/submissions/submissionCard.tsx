@@ -1,32 +1,75 @@
 import { Box, Button, HStack, Image, Text, VStack } from '@chakra-ui/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { User } from '@prisma/client';
+import axios from 'axios';
 import { useRouter } from 'next/router';
-import React from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
+import { toast, Toaster } from 'react-hot-toast';
 import { AiFillHeart } from 'react-icons/ai';
+import type { Metadata } from 'unfurl.js/dist/types';
 
-import type { Talent } from '../../../../interface/talent';
 import { userStore } from '../../../../store/user';
-import { addLike } from '../../../../utils/functions';
 
 interface Props {
-  image: string;
   winner: boolean;
-  talent: Talent;
-  likes: string[];
+  talent: User;
+  likes?: {
+    id: string;
+    date: number;
+  }[];
   id: string;
+  setUpdate: Dispatch<SetStateAction<boolean>>;
+  link: string;
 }
-export const SubmissionCard = ({ image, id, winner, talent, likes }: Props) => {
+export const SubmissionCard = ({
+  id,
+  winner,
+  talent,
+  likes,
+  setUpdate,
+  link,
+}: Props) => {
   const { userInfo } = userStore();
-  const queryClient = useQueryClient();
   const router = useRouter();
-  const likeMutation = useMutation({
-    mutationFn: () => addLike(id, userInfo?.id as string),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['bounties', router.query.id]);
-      toast.success('Like Added');
-    },
-  });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [image, setImage] = useState<string>('/assets/bg/og.svg');
+  const handleLike = async () => {
+    try {
+      setIsLoading(true);
+      await axios.post('/api/submission/like', {
+        submissionId: id,
+        userId: userInfo?.id,
+      });
+      if (likes?.find((e) => e.id === (userInfo?.id as string))) {
+        toast.success('Liked removed from submission');
+      } else {
+        toast.success('Liked submission');
+      }
+      setIsLoading(false);
+      setUpdate((prev: boolean) => !prev);
+    } catch (error) {
+      setIsLoading(false);
+      console.log(error);
+
+      toast.error('Error while liking submission');
+    }
+  };
+  useEffect(() => {
+    const fetchImage = async () => {
+      if (link) {
+        try {
+          const { data } = (await axios.post('/api/og', {
+            url: link,
+          })) as { data: Metadata };
+          setImage(data.open_graph.images![0]?.url ?? '/assets/bg/og.svg');
+        } catch (error) {
+          console.log(error);
+          setImage('/assets/bg/og.svg');
+        }
+      }
+    };
+    fetchImage();
+  }, []);
   return (
     <>
       <VStack
@@ -36,32 +79,37 @@ export const SubmissionCard = ({ image, id, winner, talent, likes }: Props) => {
         h={'18rem'}
         p={5}
         bg={'white'}
+        cursor={'pointer'}
         onClick={() => {
           router.push(`${router.asPath.split('?')[0]}/${id}`);
         }}
         rounded={'lg'}
       >
-        <Image
-          w={'full'}
-          h={80}
-          objectFit={'cover'}
-          alt={'card'}
-          src={image ?? '/assets/random/submission-card.svg'}
-        />
+        <Image w={'full'} h={80} objectFit={'cover'} alt={'card'} src={image} />
         <HStack align={'center'} justify={'space-between'} w={'full'}>
           <VStack align={'start'}>
             <Text color={'#000000'} fontSize={'1.1rem'} fontWeight={600}>
-              {talent?.firstname}
+              {talent?.firstName}
             </Text>
             <HStack>
               <Image
                 w={5}
+                h={5}
                 objectFit={'cover'}
-                alt={'profile image'}
+                alt={'profile'}
                 rounded={'full'}
-                src={talent.avatar ?? '/assets/randompeople/nft5.svg'}
+                src={
+                  talent?.photo
+                    ? talent?.photo
+                    : '/assets/randompeople/nft4.png'
+                }
               />
-              <Text color={'gray.400'}>by @{talent.username}</Text>
+              <Text color={'gray.400'}>
+                by @
+                {talent?.username && talent?.username?.length < 12
+                  ? talent?.username
+                  : `${talent?.username?.slice(0, 12)}...`}
+              </Text>
             </HStack>
           </VStack>
           <Button
@@ -73,15 +121,17 @@ export const SubmissionCard = ({ image, id, winner, talent, likes }: Props) => {
             display={'flex'}
             w={14}
             border={'1px solid #CBD5E1'}
-            onClick={() => {
+            isLoading={isLoading}
+            onClick={(e) => {
+              e.stopPropagation();
               if (!userInfo?.id) return;
-              likeMutation.mutate();
+              handleLike();
             }}
             variant={'unstyled'}
           >
             <AiFillHeart
               color={
-                likes.indexOf(userInfo?.id as string) === -1
+                !likes?.find((e) => e.id === (userInfo?.id as string))
                   ? '#94A3B8'
                   : '#FF005C'
               }

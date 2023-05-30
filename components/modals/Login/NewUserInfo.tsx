@@ -22,6 +22,11 @@ interface Props {
   setUserInfo: (userInfo: User) => void;
   setStep: (step: number) => void;
   setOtp: (otp: { current: number; last: number }) => void;
+  inviteInfo?: {
+    emailInvite?: string;
+    currentSponsorId?: string;
+    memberType?: 'MEMBER' | 'ADMIN';
+  };
 }
 
 interface Info {
@@ -34,17 +39,23 @@ const validateEmail = (email: string) => {
   if (!email) {
     return false;
   }
-  if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+  if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,8}$/i.test(email)) {
     return false;
   }
   return true;
 };
 
-function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
+function NewUserInfo({
+  setUserInfo,
+  userInfo,
+  setStep,
+  setOtp,
+  inviteInfo,
+}: Props) {
   const [userDetails, setUserDetails] = useState({
     firstName: userInfo?.firstName ?? '',
     lastName: userInfo?.lastName ?? '',
-    email: userInfo?.email ?? '',
+    email: inviteInfo?.emailInvite ?? userInfo?.email ?? '',
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -54,6 +65,25 @@ function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
       ...userDetails,
       ...info,
     });
+  };
+
+  const sendOTPEmail = async (user: User) => {
+    setUserInfo({ ...userInfo, ...user });
+    await axios.post('/api/otp/send', {
+      publicKey: userInfo?.publicKey,
+      email: userDetails?.email,
+    });
+    Mixpanel.track('otp_sent', {
+      email: userDetails?.email,
+    });
+    const code = generateCode(userInfo?.publicKey);
+    const codeLast = generateCodeLast(userInfo?.publicKey);
+    setOtp({
+      current: code,
+      last: codeLast,
+    });
+    setLoading(false);
+    setStep(3);
   };
 
   const sendOTP = async (e: FormEvent<HTMLFormElement>) => {
@@ -70,39 +100,28 @@ function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
       } else {
         setErrorMessage('');
         setLoading(true);
-        await axios.post('/api/otp/send', {
-          publicKey: userInfo?.publicKey,
-          email: userDetails?.email,
-        });
-        Mixpanel.track('otp_sent', {
-          email: userDetails?.email,
-        });
         const newUserDetails = await axios.post('/api/user/create', {
           publicKey: userInfo?.publicKey,
           email: userDetails?.email,
           firstName: userDetails?.firstName,
           lastName: userDetails?.lastName,
         });
-        setUserInfo(newUserDetails?.data);
-        const code = generateCode(userInfo?.publicKey);
-        const codeLast = generateCodeLast(userInfo?.publicKey);
-        setOtp({
-          current: code,
-          last: codeLast,
-        });
-        setLoading(false);
-        setStep(3);
+        sendOTPEmail(newUserDetails?.data);
       }
     } catch (error: any) {
       if (
         error?.response?.data?.error?.code === 'P2002' &&
         error?.response?.data?.user
       ) {
-        setErrorMessage(
-          `User already exists for this email with another wallet (${truncatePublicKey(
-            error?.response?.data?.user?.publicKey
-          )}).`
-        );
+        if (error?.response?.data?.user?.publicKey === userInfo?.publicKey) {
+          sendOTPEmail(error?.response?.data?.user);
+        } else {
+          setErrorMessage(
+            `User already exists for this email with another wallet (${truncatePublicKey(
+              error?.response?.data?.user?.publicKey
+            )}).`
+          );
+        }
       } else {
         setErrorMessage(
           `Error occurred in creating user. Error Code:${
@@ -126,6 +145,7 @@ function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
               <FormControl id="firstName" isRequired>
                 <FormLabel color="brand.slate.500">First Name</FormLabel>
                 <Input
+                  defaultValue={userDetails?.firstName}
                   focusBorderColor="brand.purple"
                   onChange={(e) => setInfo({ firstName: e.target.value })}
                   type="text"
@@ -136,6 +156,7 @@ function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
               <FormControl id="lastName" isRequired>
                 <FormLabel color="brand.slate.500">Last Name</FormLabel>
                 <Input
+                  defaultValue={userDetails?.lastName}
                   focusBorderColor="brand.purple"
                   onChange={(e) => setInfo({ lastName: e.target.value })}
                   type="text"
@@ -146,7 +167,14 @@ function NewUserInfo({ setUserInfo, userInfo, setStep, setOtp }: Props) {
           <FormControl mb={4} id="email" isRequired>
             <FormLabel color="brand.slate.500">Email address</FormLabel>
             <Input
+              _readOnly={{
+                bg: 'brand.slate.200',
+                color: 'brand.slate.500',
+                cursor: 'not-allowed',
+              }}
+              defaultValue={userDetails?.email}
               focusBorderColor="brand.purple"
+              isReadOnly={!!inviteInfo?.emailInvite}
               onChange={(e) => setInfo({ email: e.target.value })}
               type="email"
             />
