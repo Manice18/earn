@@ -24,6 +24,8 @@ export default async function user(_req: NextApiRequest, res: NextApiResponse) {
           slug: bountyTemplate.slug,
           description: bountyTemplate.description,
           skills: bountyTemplate.skills,
+          color: bountyTemplate.color,
+          emoji: bountyTemplate.emoji,
         },
       });
       console.log('Successfully Added', i);
