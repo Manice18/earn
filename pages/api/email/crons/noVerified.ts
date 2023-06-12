@@ -29,7 +29,7 @@ export default async function handler(
         return;
       }
       const msg = {
-        to: e.email,
+        to: 'dhruvrajsinghsolanki161@gmail.com',
         from: {
           name: 'Kash from Superteam',
           email: process.env.SENDGRID_EMAIL as string,
