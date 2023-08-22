@@ -98,6 +98,10 @@ function YourWork({ setStep, useFormStore }: Step1Props) {
       ...DropDownValues,
     });
     setStep((i) => i + 1);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
     return true;
   };
 
@@ -106,9 +110,10 @@ function YourWork({ setStep, useFormStore }: Step1Props) {
       <form style={{ width: '100%' }} onSubmit={handleSubmit(onSubmit)}>
         <FormControl w="full" mb={5} isRequired>
           <Flex
-            direction={{ base: 'column', md: 'row' }}
+            direction={'column'}
             gap={'1.25rem'}
             w={'full'}
+            mt={'1.25rem'}
             mb={'1.25rem'}
             outline={'0.3125rem'}
           >

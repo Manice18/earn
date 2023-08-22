@@ -51,6 +51,10 @@ function AboutYou({ setStep, useFormStore }: Step1Props) {
       }
     }
     updateState({ ...data, photo: imageUrl });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
     setStep((i) => i + 1);
   };
 

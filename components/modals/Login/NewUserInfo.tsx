@@ -74,6 +74,7 @@ function NewUserInfo({
       email: userDetails?.email,
     });
     const serverTime = response.data.time;
+    setStep(3);
     Mixpanel.track('otp_sent', {
       email: userDetails?.email,
     });
@@ -83,7 +84,6 @@ function NewUserInfo({
       current: code,
       last: codeLast,
     });
-    setStep(3);
     setLoading(false);
   };
 
