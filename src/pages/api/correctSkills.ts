@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-  type MainSkills,
-  type SubSkillsType,
-  SkillList,
-} from '@/interface/skills';
+import type { MainSkills, SubSkillsType } from '@/interface/skills';
+import { SkillList } from '@/interface/skills';
 import { prisma } from '@/prisma';
 
 const uniqueArray = (arr: SubSkillsType[]): SubSkillsType[] => {
