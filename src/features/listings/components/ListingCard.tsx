@@ -95,6 +95,63 @@ export const ListingCard = ({
     if (!isEnglish) return null;
   }
 
+  const isBeforeDeadline = dayjs().isBefore(dayjs(deadline));
+  const now = dayjs();
+  const formattedDeadline = dayjs(deadline).from(now);
+
+  const abbreviateTime = (timeStr: string) => {
+    return timeStr
+      .replace(' minutes', 'm')
+      .replace(' minute', 'm')
+      .replace(' hours', 'h')
+      .replace(' hour', 'h')
+      .replace(' days', 'd')
+      .replace(' day', 'd')
+      .replace(' months', 'mo')
+      .replace(' month', 'mo')
+      .replace(' years', 'y')
+      .replace(' year', 'y');
+  };
+
+  const shortFormattedDeadline = abbreviateTime(formattedDeadline);
+
+  let shortenedDeadline;
+  if (shortFormattedDeadline === 'in ad') {
+    shortenedDeadline = 'in 1d';
+  } else if (shortFormattedDeadline === 'in ah') {
+    shortenedDeadline = 'in 1h';
+  } else if (shortFormattedDeadline === 'in am') {
+    shortenedDeadline = 'in 1m';
+  } else if (shortFormattedDeadline === 'in ay') {
+    shortenedDeadline = 'in 1y';
+  } else if (shortFormattedDeadline === 'in amo') {
+    shortenedDeadline = 'in 1mo';
+  } else if (shortFormattedDeadline === 'ad ago') {
+    shortenedDeadline = '1d ago';
+  } else if (shortFormattedDeadline === 'ah ago') {
+    shortenedDeadline = '1h ago';
+  } else if (shortFormattedDeadline === 'am ago') {
+    shortenedDeadline = '1m ago';
+  } else if (shortFormattedDeadline === 'amo ago') {
+    shortenedDeadline = '1mo ago';
+  } else if (shortFormattedDeadline === 'ay ago') {
+    shortenedDeadline = '1y ago';
+  } else {
+    shortenedDeadline = shortFormattedDeadline;
+  }
+
+  let deadlineText;
+  if (isBeforeDeadline) {
+    deadlineText =
+      applicationType === 'rolling'
+        ? 'Rolling Deadline'
+        : `Due ${shortenedDeadline}`;
+  } else {
+    deadlineText = isWinnersAnnounced
+      ? `Completed ${shortenedDeadline}`
+      : `Expired ${shortenedDeadline}`;
+  }
+
   return (
     <>
       <Link
@@ -242,11 +299,7 @@ export const ListingCard = ({
                     fontSize={['x-small', 'xs', 'xs', 'xs']}
                     whiteSpace={'nowrap'}
                   >
-                    {dayjs().isBefore(dayjs(deadline))
-                      ? applicationType === 'rolling'
-                        ? 'Rolling Deadline'
-                        : `Due ${dayjs(deadline).fromNow()}`
-                      : `Closed ${dayjs(deadline).fromNow()}`}
+                    {deadlineText}
                   </Text>
                   {dayjs().isBefore(dayjs(deadline)) && !isWinnersAnnounced && (
                     <Circle bg="#16A35F" size="8px" />

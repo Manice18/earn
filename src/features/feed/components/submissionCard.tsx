@@ -1,11 +1,13 @@
 import { Avatar, Flex, Text, Tooltip } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import React from 'react';
 
 import { OgImageViewer } from '@/components/misc/ogImageViewer';
 import { getURL } from '@/utils/validUrl';
 
 import { type FeedDataProps } from '../types';
-import { FeedCardContainer, FeedCardLink } from './FeedCardContainer';
+import { FeedCardContainer } from './FeedCardContainer';
+import { FeedCardLink } from './FeedCardLink';
 import { WinnerFeedImage } from './WinnerFeedImage';
 
 interface SubCardProps {
@@ -25,7 +27,11 @@ export function SubmissionCard({ sub, type }: SubCardProps) {
 
   const submissionLink = `${listingLink}/submission/${sub?.id}`;
 
-  const link = isProject ? listingLink : submissionLink;
+  const link = sub?.isWinnersAnnounced
+    ? isProject
+      ? listingLink
+      : submissionLink
+    : listingLink;
 
   let winningText: string = '';
   let submissionText: string = '';
@@ -56,9 +62,17 @@ export function SubmissionCard({ sub, type }: SubCardProps) {
       <Flex align={'center'} gap={3}>
         <Avatar size={'xs'} src={sub?.sponsorLogo} />
         <Text
+          as={NextLink}
+          overflow={'hidden'}
           color={'brand.slate.500'}
           fontSize={{ base: 'sm', md: 'md' }}
           fontWeight={600}
+          _hover={{ textDecoration: 'underline' }}
+          textOverflow={'ellipsis'}
+          href={listingLink}
+          noOfLines={1}
+          rel="noopener noreferrer"
+          target="_blank"
         >
           {sub?.listingTitle}
         </Text>
@@ -70,7 +84,7 @@ export function SubmissionCard({ sub, type }: SubCardProps) {
         fontFamily={'var(--font-sans)'}
         bg="white"
         borderRadius={'lg'}
-        isDisabled={!!sub?.id && !isProject}
+        isDisabled={!!sub?.id || isProject}
         label={
           'This submission will be accessible once winners for the listing have been announced.'
         }
@@ -79,8 +93,8 @@ export function SubmissionCard({ sub, type }: SubCardProps) {
         <FeedCardLink
           href={link}
           style={{
-            opacity: sub?.id ? '100%' : '50%',
-            pointerEvents: sub?.id ? 'all' : 'none',
+            opacity: sub?.id || isProject ? '100%' : '50%',
+            pointerEvents: sub?.id || isProject ? 'all' : 'none',
           }}
         >
           {isProject ? 'View Listing' : 'View Submission'}
